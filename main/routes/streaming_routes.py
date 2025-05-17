@@ -4,26 +4,9 @@ from main.services.streaming_services import ( new_event_service , start_event_m
                                               play_event , pause_event, get_sports_list,
                                               stop_event,change_socket_video_source,
                                               start_youtube_streaming, video_source_list,
-                                              stop_youtube_streaming, validate_ws_client, 
+                                              stop_youtube_streaming, validate_ws_client,
                                               video_source_remove, video_source_select)
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt_header, decode_token
-from functools import wraps
-
-
-def token_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        token = request.args.get('token')
-        if not token:
-            return jsonify({'message': 'Token is missing!'}), 403
-        try:
-            decoded_token = decode_token(token)
-            print(decoded_token)
-            request.user_identity = decoded_token['sub']
-        except Exception as e:
-            return jsonify({'message': 'Token is invalid!'}), 403
-        return f(*args, **kwargs)
-    return decorated_function
 
 streaming_bp = Blueprint('streaming', __name__, url_prefix='/streaming')
 
@@ -64,7 +47,7 @@ def change_socket_video_source_event(video_source_name):
 @jwt_required(optional=True)
 def start_youtube_streaming_event():
     return start_youtube_streaming()
-video_source_select
+
 @streaming_bp.route('/stop_youtube_streaming', methods=['POST'])
 @jwt_required(optional=True)
 def stop_youtube_streaming_event():
