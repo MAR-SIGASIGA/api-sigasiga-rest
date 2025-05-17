@@ -1,0 +1,96 @@
+from flask import Blueprint, Response, request, jsonify
+from flask import render_template
+from main.services.streaming_services import ( new_event_service , start_event_manager,
+                                              play_event , pause_event, get_sports_list,
+                                              stop_event,change_socket_video_source,
+                                              start_youtube_streaming, video_source_list,
+                                              stop_youtube_streaming, validate_ws_client, 
+                                              video_source_remove, video_source_select)
+from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt_header, decode_token
+from functools import wraps
+
+
+def token_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.args.get('token')
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 403
+        try:
+            decoded_token = decode_token(token)
+            print(decoded_token)
+            request.user_identity = decoded_token['sub']
+        except Exception as e:
+            return jsonify({'message': 'Token is invalid!'}), 403
+        return f(*args, **kwargs)
+    return decorated_function
+
+streaming_bp = Blueprint('streaming', __name__, url_prefix='/streaming')
+
+@streaming_bp.route('/new_event/<sport_id>', methods=['POST'])
+def new_event(sport_id):
+    return new_event_service(sport_id)
+
+#Devuelve un diccionario que contiene como clave/valor el indice correspondiente al nombre del deporte en la lista de los deportes disponibles.
+@streaming_bp.route('/get_sports', methods=['GET'])
+def get_sports():
+    data = get_sports_list()
+    return data
+
+
+@streaming_bp.route('/play_event/<event_id>', methods=['POST'])
+def play(event_id):
+    play_event(event_id)
+    return 'Streaming playing'
+
+@streaming_bp.route('/pause_event/<event_id>', methods=['POST'])
+def pause(event_id):
+    pause_event(event_id)
+    return 'Streaming paused'
+
+
+@streaming_bp.route('/stop_event', methods=['POST'])
+@jwt_required(optional=True)
+def stop():
+    return stop_event()
+
+@streaming_bp.route('/change_socket_video_source/<video_source_name>', methods=['POST'])
+@jwt_required(optional=True)
+def change_socket_video_source_event(video_source_name):
+    change_socket_video_source(video_source_name)
+    return f'Video Source Changed'
+
+@streaming_bp.route('/start_youtube_streaming', methods=['POST'])
+@jwt_required(optional=True)
+def start_youtube_streaming_event():
+    return start_youtube_streaming()
+video_source_select
+@streaming_bp.route('/stop_youtube_streaming', methods=['POST'])
+@jwt_required(optional=True)
+def stop_youtube_streaming_event():
+    return stop_youtube_streaming()
+
+@streaming_bp.route('/validate_ws_client', methods=['POST'])
+@jwt_required(optional=False)
+def validate_ws_client_event():
+    return validate_ws_client()
+
+@streaming_bp.route('/video_source_list', methods=['GET'])
+@jwt_required(optional=False)
+def event_video_source_list():
+    return video_source_list()
+
+@streaming_bp.route('/video_source_select', methods=['POST'])
+@jwt_required(optional=False)
+def event_video_source_select():
+    return video_source_select()
+
+@streaming_bp.route('/video_source_remove', methods=['POST'])
+@jwt_required(optional=False)
+def event_video_source_remove():
+    return video_source_remove()
+
+@streaming_bp.route('/start_manager/<event_id>', methods=['POST'])
+def start_manager(event_id):
+    start_event_manager(event_id)
+    return {'message': 'Event manager started'}, 200
