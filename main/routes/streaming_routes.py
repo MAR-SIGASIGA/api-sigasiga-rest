@@ -4,7 +4,7 @@ from main.services.streaming_services import ( new_event_service , start_event_m
                                               start_rtmp_streaming, video_source_list,
                                               stop_rtmp_streaming, validate_ws_client,
                                               video_source_remove, video_source_select,
-                                              stop_event, get_sports_list, toogle_rtmp_status)
+                                              stop_event, sports_list, toogle_rtmp_status)
 
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt_header, decode_token
 
@@ -15,10 +15,9 @@ def new_event(sport_id):
     return new_event_service(sport_id)
 
 #Devuelve un diccionario que contiene como clave/valor el indice correspondiente al nombre del deporte en la lista de los deportes disponibles.
-@streaming_bp.route('/get_sports', methods=['GET'])
-def get_sports():
-    data = get_sports_list()
-    return data
+@streaming_bp.route('/sports_list', methods=['GET'])
+def sports_list_event():
+    return sports_list()
 
 @streaming_bp.route('/stop_event', methods=['POST'])
 @jwt_required(optional=True)
@@ -62,5 +61,4 @@ def event_video_source_remove():
 
 @streaming_bp.route('/start_manager/<event_id>', methods=['POST'])
 def start_manager(event_id):
-    start_event_manager(event_id)
-    return {'message': 'Event manager started'}, 200
+    return start_event_manager(event_id)

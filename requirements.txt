@@ -8,6 +8,7 @@ Flask-SQLAlchemy==3.1.1
 PyMySQL==1.1.1
 python-dotenv==1.1.0
 qrcode==8.1
+pillow==11.2.1
 redis==5.2.1
 requests==2.32.3
 shortuuid==1.0.13

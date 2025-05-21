@@ -26,7 +26,10 @@ def modify_points():
         current_points += int(points)
         current_points = max(current_points, 0)
         redis.set(f'{event_id}-scoreboard-{team}_points', current_points)
-        return{f'{team}_points': current_points}
+        json_response = {
+            f'{team}_points': current_points
+        }
+        return json_response, 200
     except Exception as e:
         return {"error": str(e)}, 500
     
@@ -39,7 +42,10 @@ def set_team():
         if team in ['local', 'visitor']:
             team_name = data.get('team_name')
             redis.set(f'{event_id}-scoreboard-{team}_team', team_name.encode('utf-8'))
-            return {"team_status": "setted"}
+            json_response = {
+                "team_status": "setted"
+            }
+            return json_response, 200
         else:
             return {"error": "Invalid team"}, 400
     except Exception as e:
@@ -52,7 +58,10 @@ def set_teams():
         teams_data = request.get_json()
         for key in teams_data:
             redis.set(f'{event_id}-scoreboard-{key}', teams_data[key])
-        return {"teams_status": "setted"}
+        json_response = {
+            "teams_status": "setted"
+        }
+        return json_response, 200
     except Exception as e:
         return {"error": str(e)}, 500
 
@@ -60,14 +69,24 @@ def set_teams():
 def set_time(ms_time):
     claims = get_jwt().get('claims')
     event_id = claims.get('event_id')
+    if int(ms_time) <= 0:
+        return {"error": "Time must be greater than 0"}, 400
     redis.set(f'{event_id}-scoreboard-timer', int(ms_time))
-    return {"time": "setted"}
+    json_response = {
+        "timer": "setted"
+    }
+    return json_response, 200
 
 def set_time24(ms_time):
     claims = get_jwt().get('claims')
     event_id = claims.get('event_id')
-    redis.set(f'{event_id}-scoreboard-24time', int(ms_time))
-    return {"time24": "setted"}
+    if int(ms_time) <= 0:
+        return {"error": "Time must be greater than 0"}, 400
+    redis.set(f'{event_id}-scoreboard-24_timer', int(ms_time))
+    json_response = {
+        "24_timer": "setted"
+    }
+    return json_response, 200
 
 def toogle_timer_status():
     claims = get_jwt().get('claims')
@@ -77,7 +96,10 @@ def toogle_timer_status():
         redis.set(f'{event_id}-scoreboard-timer_status', int(False))
     else: 
         redis.set(f'{event_id}-scoreboard-timer_status', int(True))
-    return {"timer_status" : int(redis.get(f'{event_id}-scoreboard-timer_status'))}
+    json_response = {
+        "timer_status" : int(redis.get(f'{event_id}-scoreboard-timer_status'))
+    }
+    return json_response, 200
 
 def toogle_timer24_status():
     claims = get_jwt().get('claims')
@@ -87,4 +109,7 @@ def toogle_timer24_status():
         redis.set(f'{event_id}-scoreboard-24_timer_status', int(False))
     else: 
         redis.set(f'{event_id}-scoreboard-24_timer_status', int(True))
-    return {"timer24_status" : int(redis.get(f'{event_id}-scoreboard-24_timer_status'))}
+    json_response = {
+        "timer24_status" : int(redis.get(f'{event_id}-scoreboard-24_timer_status'))
+    }
+    return json_response, 200
