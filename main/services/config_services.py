@@ -41,7 +41,7 @@ def add_new_participant():
         redis.set(f"user-{new_user_id}-token", access_token)
 
 
-        join_url = web_url + f'/join-event?token={str(access_token)}'
+        join_url = web_url + f'/join-event?token={str(access_token)}&event_id={event_id}'
         redis.set(f"user-{new_user_id}-join_url", join_url)
 
         join_qr_img = qr_generate(join_url)
