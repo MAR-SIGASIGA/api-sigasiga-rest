@@ -12,9 +12,9 @@ class Config:
     REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
     REDIS_DB = int(os.getenv('REDIS_DB', 0))
 
-    MYSQL_USER = str(os.getenv('MYSQL_USER', ''))
-    MYSQL_PASSWORD = str(os.getenv('MYSQL_PASSWORD', ''))
-    MYSQL_HOSTNAME = str(os.getenv('MYSQL_HOSTNAME', 'database-sigasiga'))
+    MYSQL_USER = str(os.getenv('MYSQL_USER', 'root'))
+    MYSQL_PASSWORD = str(os.getenv('MYSQL_PASSWORD', 'Marcos12root'))
+    MYSQL_HOSTNAME = str(os.getenv('MYSQL_HOSTNAME', 'mariadb'))
     MYSQL_DB_NAME = str(os.getenv('MYSQL_DB_NAME', 'sigasiga'))
     MYSQL_PORT = int(os.getenv('MYSQL_PORT', 3306))
 

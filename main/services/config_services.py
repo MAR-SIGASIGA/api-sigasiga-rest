@@ -171,3 +171,14 @@ def qr_generate(join_url):
     send_file(buffer, mimetype='image/png')
     encoded_img_qr = encodebytes(buffer.getvalue()).decode('ascii')
     return encoded_img_qr
+
+def rtmp_info():
+    claims = get_jwt().get('claims')
+    event_id = claims.get('event_id')
+    rtmp_key = redis.get(f"{event_id}-rtmp_key").decode('utf-8')
+    rtmp_status = int(redis.get(f"{event_id}-rtmp_status").decode('utf-8'))
+    json_response = {
+        "rtmp_key": rtmp_key,
+        "rtmp_status": True if rtmp_status else False
+    }
+    return json_response, 200

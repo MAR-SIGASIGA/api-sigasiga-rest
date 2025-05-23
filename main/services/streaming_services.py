@@ -8,6 +8,7 @@ import uuid
 from ..models.sport import Sport
 from ..utils.redis_list_manager import RedisListManager
 import json
+from ..utils.sio_pubsub_redis import publish_to_redis
 
 def new_event_service(sport_id):
     try:
@@ -105,6 +106,9 @@ def stop_event():
         json_response = {
             f'{event_id} Status': "Stopped and removed"
         }
+        publish_to_redis(event_id=event_id, 
+                         event_type="config_room-stop_event", 
+                         data_dict=json_response)
         return json_response, 200
     except Exception as e:
         return {"error": str(e)}, 500
@@ -126,8 +130,11 @@ def start_rtmp_streaming():
         if not rtmp_url or not rtmp_key:
             return {"error": "RTMP URL or RTMP Key not found"}, 400
         redis.publish(f"{event_id}-event_manager", json.dumps({"action": "start_rtmp_emitter"}).encode('utf-8'))
+        redis.set(f"{event_id}-rtmp_status", int(True))
+
         json_response = {
-            "message": "RTMP streaming started"
+            "message": "RTMP streaming started",
+            "status": True
         }
         return json_response, 200
     except Exception as e:
@@ -139,7 +146,8 @@ def stop_rtmp_streaming():
         event_id = claims.get('event_id')
         redis.set(f"{event_id}-rtmp_status", int(False))
         json_response = {
-            "message": "RTMP streaming stopped"
+            "message": "RTMP streaming stopped",
+            "status": False
         }
         return json_response, 200
     except Exception as e:
@@ -160,15 +168,21 @@ def toogle_rtmp_status():
             # Start RTMP streaming on EventManager
             redis.publish(f"{event_id}-event_manager", json.dumps({"action": "start_rtmp_emitter"}).encode('utf-8'))
             json_response = {
-                "message": "RTMP streaming started"
-            }
-            return json_response, 200
+                "message": "RTMP streaming started",
+                "status": True
+            }       
         else:
             # Stop RTMP streaming on EventManager, if status is False, RTMP process auto stop
             json_response = {
-                "message": "RTMP streaming stopped"
+                "message": "RTMP streaming stopped",
+                "status": False
             }
-            return json_response, 200
+
+        publish_to_redis(event_id=event_id, 
+                         event_type="config_room-rtmp_status", 
+                         data_dict=json_response)
+        
+        return json_response, 200
     except Exception as e:
         return {"error": str(e)}, 500
     

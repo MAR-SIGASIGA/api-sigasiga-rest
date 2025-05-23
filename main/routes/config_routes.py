@@ -4,7 +4,8 @@ from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from main.services.config_services import  (set_rtmp_key,
                                             add_new_participant, event_participants,
-                                            join_event, event_participant, join_qr_img_bytes)
+                                            join_event, event_participant, join_qr_img_bytes,
+                                            rtmp_info)
 
 config_bp = Blueprint('config', __name__, url_prefix='/config')
 
@@ -35,3 +36,8 @@ def join_event_event():
 @config_bp.route('/join_qr_img_bytes', methods=['GET'])
 def join_qr_img_bytes_event():
     return join_qr_img_bytes()
+
+@config_bp.route('/rtmp_info', methods=['GET'])
+@jwt_required(optional=True)
+def rtmp_info_event():
+    return rtmp_info()
