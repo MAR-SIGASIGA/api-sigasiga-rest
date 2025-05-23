@@ -1,7 +1,7 @@
 from main import redis
 import shortuuid
 from datetime import datetime
-import main.modules.remove_redis_data as remove_redis_data
+from ..utils.remove_redis_data import delete_event_redis
 from flask import jsonify, request
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt, decode_token
 import uuid
@@ -101,7 +101,7 @@ def stop_event():
         event_id = claims.get('event_id')
         channel = f"{event_id}-event_manager"
         redis.publish(channel, json.dumps({"action": "stop_event"}).encode('utf-8'))
-        # remove_redis_data.delete_event(event_id, current_user)
+        delete_event_redis(event_id)
         json_response = {
             f'{event_id} Status': "Stopped and removed"
         }

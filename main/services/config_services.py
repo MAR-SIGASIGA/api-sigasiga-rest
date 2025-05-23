@@ -138,12 +138,9 @@ def get_some_parameter(current_user, parameter):
         event_id = redis.get(f"user-{current_user}-id_event")
         event_id = event_id.decode('utf-8')
         pattern = f"{event_id}-{parameter}"
-        print(pattern)
         result = redis.get(pattern).decode('utf-8')
-        print(result)
         return {f"{parameter}": str(result)}
     except Exception as e:
-        print(e)
         return {f"{parameter}": "", "error": "error al obtener el parametro"}
 
 def join_qr_img_bytes():
@@ -153,7 +150,6 @@ def join_qr_img_bytes():
     try:
         decoded_token = decode_token(token)
     except Exception as e:
-        print(e)
         return {"message": "Token invalido"}, 401
     if user_id is None:
         return {"message": "User id is required"}, 400
@@ -161,8 +157,6 @@ def join_qr_img_bytes():
     event_id = claims.get('event_id')
     participants_list_key = f"{event_id}-participants_list"
     participants_list = RedisListManager(redis).get_all(key=participants_list_key)
-    print(participants_list)
-    print(user_id)
     if user_id not in participants_list:
         return {"message": "Participante no encontrado para este evento"}, 404
     img_bytes = redis.get(f"user-{user_id}-join_qr_img_bytes")
